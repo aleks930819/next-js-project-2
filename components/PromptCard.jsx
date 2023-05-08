@@ -6,8 +6,18 @@ import Image from 'next/image';
 import { useSession } from 'next-auth/react';
 import { usePathname, useRouter } from 'next/navigation';
 
-const PromptCard = ({ prompt, handleTagClick, hadnleEdit, handleDelete }) => {
-  const [copie, setCopie] = useState(false);
+const PromptCard = ({ prompt, handleTagClick, handleEdit, handleDelete }) => {
+  const [copie, setCopie] = useState('');
+  const { data: session } = useSession();
+  const pathname = usePathname();
+
+  const handleCopy = () => {
+    setCopie(prompt.prompt);
+    navigator.clipboard.writeText(prompt.prompt);
+    setTimeout(() => {
+      setCopie('false');
+    }, 3000);
+  };
 
   return (
     <div className="flex flex-col items-center justify-center w-full h-full px-4 py-8 bg-gray-100 rounded-lg">
@@ -26,8 +36,10 @@ const PromptCard = ({ prompt, handleTagClick, hadnleEdit, handleDelete }) => {
         </div>
       </div>
       <div
-        onClick={() => {}}
-        className="flex flex-col items-center justify-center w-full h-full mt-8"
+        onClick={() => {
+          handleCopy();
+        }}
+        className="flex flex-col items-center justify-center w-full h-full mt-8 cursor-pointer"
       >
         <Image
           src={
@@ -45,6 +57,22 @@ const PromptCard = ({ prompt, handleTagClick, hadnleEdit, handleDelete }) => {
       >
         {prompt.prompt} {prompt.tag}
       </p>
+      {session?.user.id === prompt.creator._id && pathname === '/profile' && (
+        <div className="flex justify-between items-center w-full mt-8">
+          <button
+            onClick={handleEdit}
+            className="px-4 py-2 text-sm font-semibold text-white bg-blue-500 rounded-lg"
+          >
+            Edit
+          </button>
+          <button
+            onClick={handleDelete}
+            className="px-4 py-2 text-sm font-semibold text-white bg-red-500 rounded-lg"
+          >
+            Delete
+          </button>
+        </div>
+      )}
     </div>
   );
 };
